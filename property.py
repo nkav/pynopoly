@@ -7,6 +7,18 @@ class Property:
   text = 'white'
   bg = None
 
+  available = {
+    'railroads': 4,
+    'utilities': 2,
+    'purples': 2,
+    'lightblues': 3,
+    'magentas': 3,
+    'oranges': 3, 
+    'reds': 3,
+    'yellows': 3,
+    'greens': 3,
+    'blues': 2 
+  } 
   def __init__(self, name, group, price):
     self.name = name
     self.price = price
@@ -19,6 +31,10 @@ class Property:
     return self.name
 
   def chargerent(self):
+    if self.owner.ismonopoly(self.group, Property.available[self.group]):
+      print "You owe twice the rent since %s owns a monopoly!" % (self.owner)
+      raw_input("We have monopoly rent! ")
+      return 2*self.rent 
     return self.rent    
 
   def purchased(self, person):

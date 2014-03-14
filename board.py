@@ -3,6 +3,18 @@ from property import Property, RailroadProperty
 communitychests = [2, 17, 33]
 chances = [7, 22, 36] 
 
+
+monopolizable = [
+  'purples',
+  'lightblues',
+  'magentas',
+  'oranges',
+  'reds', 
+  'yellows',
+  'greens',
+  'blues',
+]
+
 board = {
   1:  Property('Mediterranean Avenue', 'purples', 60),
   3:  Property('Baltic Avenue', 'purples', 60),

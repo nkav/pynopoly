@@ -1,7 +1,8 @@
 from probability import die, chancecard, communitychestcard
 from graphics import printplayer, printboard, newscreen, propertiesowned, sectionbreak
 import math
-from board import board, chances, communitychests
+from board import board, chances, communitychests, monopolizable
+from property import Property
 import copy
 from cards import chance, communitychest
 
@@ -25,6 +26,7 @@ class Player:
     'greens': [],
     'blues': []
   } 
+  
   def __init__(self, name, simulate=False):
     self.name = name
     self.owned = copy.deepcopy(Player.owned)
@@ -44,6 +46,18 @@ class Player:
     if not self.simulate:
       raw_input("Enter to continue. ")
     newscreen()
+
+  def ismonopoly(self, color, needed):
+    if color not in monopolizable:
+      return False
+    elif len(self.owned[color]) == needed:
+      print "%s has a monopoly on %s!" % (self, color) 
+      return True
+
+  def hasmonopoly(self):
+    for key in self.owned.keys():
+      needed = Property.available[key]
+      self.ismonopoly(key, needed) 
  
   def rentorbuy(self, place):
     targetproperty = board[place]
@@ -75,6 +89,7 @@ class Player:
   def roll(self):
     self.checkbalance()
     propertiesowned(self)
+    self.hasmonopoly()
     sectionbreak()
     if not self.simulate:
       raw_input("Enter to roll. ")
