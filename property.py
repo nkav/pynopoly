@@ -42,7 +42,6 @@ class Property:
     """ 
     if self.owner.ismonopoly(self.group, Property.available[self.group]):
       print "You owe twice the rent since %s owns a monopoly!" % (self.owner)
-      raw_input("We have monopoly rent! ")
       return 2*self.rent 
     return self.rent    
 
