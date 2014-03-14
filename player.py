@@ -1,9 +1,9 @@
-from probability import die, chancecard
-from graphics import printplayer, printboard, newscreen, propertiesowned
+from probability import die, chancecard, communitychestcard
+from graphics import printplayer, printboard, newscreen, propertiesowned, sectionbreak
 import math
 from board import board, chances, communitychests
 import copy
-from chance import chance 
+from cards import chance, communitychest
 
 class Player:
   """Monopoly player"""
@@ -12,6 +12,7 @@ class Player:
   money = 2000
   position = 0 #Start at Go
   doublesrecord = 0
+  simulate = False
   owned = {
     'railroads': [],
     'utilities': [],
@@ -24,9 +25,10 @@ class Player:
     'greens': [],
     'blues': []
   } 
-  def __init__(self, name):
+  def __init__(self, name, simulate=False):
     self.name = name
     self.owned = copy.deepcopy(Player.owned)
+    self.simulate = simulate
 
   def __repr__(self):
     return self.name
@@ -39,7 +41,8 @@ class Player:
 
   def jailtimeleft(self):
     print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
-    raw_input("Enter to continue. ")
+    if not self.simulate:
+      raw_input("Enter to continue. ")
     newscreen()
  
   def rentorbuy(self, place):
@@ -61,7 +64,8 @@ class Player:
         self.jailed()
         return True
       else:
-        print "You got doubles! You get to roll again at the end. If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord)
+        print "You got doubles! You get to roll again at the end."
+        print "If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord)
         self.doublesrecord += 1
         return False
     else:
@@ -70,8 +74,10 @@ class Player:
  
   def roll(self):
     self.checkbalance()
-    propertiesowned(self.owned)
-    raw_input("Enter to roll. ")
+    propertiesowned(self)
+    sectionbreak()
+    if not self.simulate:
+      raw_input("Enter to roll. ")
     die1 = die()
     die2 = die()
     dice = die1 + die2 
@@ -87,10 +93,17 @@ class Player:
       print "Landed on %s." % (currentspot)
       self.rentorbuy(self.position)
     elif self.position in chances:
+      print "You landed on Chance!"
+      if not self.simulate:
+        raw_input("Enter to draw a card. ")
       x = chancecard()
       chance[x](self)
     elif self.position in communitychests:
-      print "Community Chest!"
+      print "You landed on Community Chest!"
+      if not self.simulate:
+        raw_input("Enter to draw a card. ")
+      x = communitychestcard()
+      communitychest[x](self)
     elif self.position == 30:
       print "You landed on Go to Jail!"
       self.jailed()
@@ -107,7 +120,9 @@ class Player:
       print "Landed on Luxury Tax. You'll need to pay $75!"
       self.pay(75, None)
     self.checkbalance()  
-    raw_input("Enter to continue. ")
+    sectionbreak()
+    if not self.simulate:
+      raw_input("Enter to continue. ")
     newscreen()
     if doubles:
       print "Roll again!"
@@ -138,7 +153,7 @@ class Player:
     self.land(doubles)
         
   def checkbalance(self):
-    print "Your current balance is $%d." % (self.money)
+    print "%s's current balance is $%d." % (self, self.money)
 
   def payrent(self, place):
     rent = place.chargerent()  
@@ -168,8 +183,11 @@ class Player:
       return "The property is already owned by %s." % (place.owner)
     else:
       response = ''
-      while ((response != 'Y') and (response != 'N')):
-        response = raw_input("Will you buy %s for $%d? (Y/N) " % (place.name, place.price))
+      if not self.simulate: 
+        while ((response != 'Y') and (response != 'N')):
+          response = raw_input("Will you buy %s for $%d? (Y/N) " % (place.name, place.price))
+      else:
+        response = 'Y'
       if (response == 'Y'):
         if (self.pay(place.price, None)):
           self.addproperty(place)

@@ -1,11 +1,15 @@
 from termcolor import cprint, colored
-import sys
+import os,sys
 
 def newscreen():
-  print '\n' * 22
+  os.system('cls' if os.name == 'nt' else 'clear')
 
-def propertiesowned(properties):
-  places = sum(properties.values(), [])
+def sectionbreak():
+  print '*' * 70
+
+
+def propertiesowned(player):
+  places = sum(player.owned.values(), [])
   coloredplaces = []
   for place in places:
     if place.bg:
@@ -13,9 +17,9 @@ def propertiesowned(properties):
     else:
       coloredplaces.append(colored(place.name, place.text))
   if places:
-    print "You own the following properties: " + ", ".join(coloredplaces) + "."
+    print "%s owns the following properties: " % (player) + ", ".join(coloredplaces) + "."
   else:
-    print "You don't own any properties yet."
+    print "%s doesn't own any properties yet." % (player)
 
 def printboard():
   cprint (u"G", 'green', 'on_yellow', end= ' ') 

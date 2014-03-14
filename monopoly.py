@@ -26,7 +26,7 @@ class Monopoly:
       self.nextturn()
 
 if __name__ == '__main__':
-  main = Player("Nilesh") 
-  player2 = Player("New Player") 
+  main = Player("Nilesh", simulate=True) 
+  player2 = Player("New Player", simulate=True) 
   newgame = Monopoly([main, player2], 100)
   newgame.start()

@@ -5,4 +5,7 @@ def die():
   return random.randint(1,6)
 
 def chancecard():
-  return random.randint(1,11)
+  return random.randint(0,11)
+
+def communitychestcard():
+  return random.randint(0,12)
