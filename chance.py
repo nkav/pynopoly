@@ -41,6 +41,26 @@ def goback3(player):
   chancecard("go back 3 spaces!")
   player.advance(player.position - 3)
 
+def gotojail(player):
+  chancecard("to go directly to jail!")
+  player.jailed()
+ 
+def poortax(player):
+  chancecard("to pay a poor tax of $15.")
+  player.pay(15, None)
+
+def readingrr(player):
+  chancecard("to advance to Reading Railroad. If unowned, you may buy it!")
+  player.advance(5)
+
+def boardwalk(player):
+  chancecard("to take a walk on Boardwalk! Advance directly to this space.")
+  player.advance(39)
+
+def loanmatures(player):
+  chancecard("to collect the returns on your mature building loan. Collect $150!")
+  player.money += 150
+ 
 chance = [
   advancetogo,
   advancetoil,
@@ -49,17 +69,16 @@ chance = [
   advancetorr,
   bankpays50,
   goback3,
+  gotojail,
+  readingrr,
+  boardwalk,
+  loanmatures,
 ]
 
 """To be implemented:
   getoutofjail,
-  gotojail,
   repairs,
-  poortax,
-  readingrr,
-  boardwalk,
-  youpay50,
-  loanmatures,
   crossword
+  youpay50,
 """
 

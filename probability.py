@@ -5,4 +5,4 @@ def die():
   return random.randint(1,6)
 
 def chancecard():
-  return random.randint(1,4)
+  return random.randint(1,11)
