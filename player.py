@@ -1,8 +1,9 @@
-from probability import die
-from graphics import printplayer, printboard, newscreen
+from probability import die, chancecard
+from graphics import printplayer, printboard, newscreen, propertiesowned
 import math
 from board import board, chances, communitychests
 import copy
+from chance import chance 
 
 class Player:
   """Monopoly player"""
@@ -78,14 +79,13 @@ class Player:
     if self.doublesjail(die1, die2):
       return None
     self.advance(self.position + dice)
-    printboard()
-    printplayer('X', self.position)
     if self.position in board.keys():
       currentspot = board[self.position]
       print "Landed on %s." % (currentspot)
       self.rentorbuy(self.position)
     elif self.position in chances:
-      print "Chance!"
+      x = chancecard()
+      chance[x](self)
     elif self.position in communitychests:
       print "Community Chest!"
     elif self.position == 30:
@@ -130,6 +130,8 @@ class Player:
       self.money += 200
       print "You just passed go and collected $200!"  
       self.checkbalance()
+    printboard()
+    printplayer('X', self.position) 
         
   def checkbalance(self):
     print "Your current balance is $%d." % (self.money)

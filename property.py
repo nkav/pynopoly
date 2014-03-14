@@ -53,7 +53,7 @@ class Property:
 class RailroadProperty(Property):
   def chargerent(self):
     if self.owner:
-      self.rent = len(self.owner.properties['railroads'])*25 
+      self.rent = len(self.owner.owned['railroads'])*25 
       return self.rent
     else:
       return self.rent
