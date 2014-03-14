@@ -1,9 +1,15 @@
+#!/usr/bin/env python
+""" 
+board.py - outlines the structure of the board 
+"""
+
 from property import Property, RailroadProperty
 
+#spaces where user must draw a card
 communitychests = [2, 17, 33]
 chances = [7, 22, 36] 
 
-
+#groups that can be made into a monopoly
 monopolizable = [
   'purples',
   'lightblues',
@@ -15,6 +21,8 @@ monopolizable = [
   'blues',
 ]
 
+#dictionary binding of board indices [0,39] to Property types
+#card spaces, tax spaces, jail, etc. are handled by the Player's self.land() function
 board = {
   1:  Property('Mediterranean Avenue', 'purples', 60),
   3:  Property('Baltic Avenue', 'purples', 60),

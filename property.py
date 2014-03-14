@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+""" 
+property.py - the basic class for a Property, as well as for the RailroadProperty
+"""
+
 class Property:
   name = ""
   price = 0 
@@ -6,7 +11,8 @@ class Property:
   group = ''
   text = 'white'
   bg = None
-
+  
+  #number of total available properties for each group type
   available = {
     'railroads': 4,
     'utilities': 2,
@@ -31,6 +37,9 @@ class Property:
     return self.name
 
   def chargerent(self):
+    """Charges rent depending on monopoly.
+      If owner owns all properties of a given color, he/she is able to charge twice the rent.
+    """ 
     if self.owner.ismonopoly(self.group, Property.available[self.group]):
       print "You owe twice the rent since %s owns a monopoly!" % (self.owner)
       raw_input("We have monopoly rent! ")
@@ -38,12 +47,15 @@ class Property:
     return self.rent    
 
   def purchased(self, person):
+    """Allows a given Player to purchase a card."""
     self.owner = person
 
   def sold(self):
+    """Allows a given Player to sell the card back to the Bank."""
     self.owner = None 
   
   def determinecolor(self):
+    #Determines the colors needed for the property when printing to terminal. 
     if self.group == 'purples':
       self.text = 'blue'
       self.bg = 'on_red'

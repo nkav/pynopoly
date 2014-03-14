@@ -1,14 +1,22 @@
+#!/usr/bin/env python
+""" 
+graphics.py - functions for the primitive terminal interface.
+"""
+
 from termcolor import cprint, colored
 import os,sys
 
 def newscreen():
+  #clears screen
   os.system('cls' if os.name == 'nt' else 'clear')
 
 def sectionbreak():
+  #logical breaks between sections so text is not distracting
   print '*' * 70
 
 
 def propertiesowned(player):
+  #Prints all the properties the user owns and colors them appropriately.
   places = sum(player.owned.values(), [])
   coloredplaces = []
   for place in places:
@@ -22,6 +30,7 @@ def propertiesowned(player):
     print "%s doesn't own any properties yet." % (player)
 
 def printboard():
+  # A linear rendition of the board with each space colored appropriately.
   cprint (u"G", 'green', 'on_yellow', end= ' ') 
   cprint(u"\u2588", 'blue', 'on_red', end=' ')
   print u"C ", 
@@ -61,7 +70,8 @@ def printboard():
   print u"c ", 
   cprint(u"\u2588", 'blue', end='')
   print u"\u2588 ", 
-  cprint(u"\u2588", 'blue', end='\n\n')
+  cprint(u"\u2588", 'blue', end='\n')
 
 def printplayer(symbol, position):
+  # Prints the players location on the board according to printboard()
   sys.stdout.write(" "*(position)*2 + symbol + '\n')

@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+""" 
+player.py - creates functions for a Player 
+"""
+
 from probability import die, chancecard, communitychestcard
 from graphics import printplayer, printboard, newscreen, propertiesowned, sectionbreak
 import math
@@ -8,12 +13,12 @@ from cards import chance, communitychest
 
 class Player:
   """Monopoly player"""
-  bankrupt = False
-  jailtime = 0
-  money = 2000
+  bankrupt = False #If a player is ever unable to pay rent, then he/she loses game
+  jailtime = 0 #If greater than 0, user is in jail for that number many more turns
+  money = 2000 #Default starting money
   position = 0 #Start at Go
-  doublesrecord = 0
-  simulate = False
+  doublesrecord = 0 #Number of doubles at any given moment. 3 doubles means go to jail
+  simulate = False #Faster version that defaults to buying property and skipping inputs
   owned = {
     'railroads': [],
     'utilities': [],
@@ -28,6 +33,14 @@ class Player:
   } 
   
   def __init__(self, name, simulate=False):
+    """Initialize new Player
+      args:
+      name -- string of the player's name
+      kwargs:
+      simulate -- Defaults to false. If True, faster version of game is played where inputs are skipped
+                  and properties are bought by default
+    """
+    
     self.name = name
     self.owned = copy.deepcopy(Player.owned)
     self.simulate = simulate
@@ -36,30 +49,50 @@ class Player:
     return self.name
 
   def servetime(self):
+    """Serve time in jail
+      If player needs to serve more terms in jail, the function decrements jailtime.
+      It returns True if the Player needs to serve more time, or False if Player has finished serving
+    """ 
     if (self.jailtime > 0):
       self.jailtime -= 1
       return True 
     return False 
 
   def jailtimeleft(self):
+    """Replacement for user turn
+      If a player is in jail, then this function will be called.
+      It notifies the user how many more turns in needs to serve in Jail.
+    """
     print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
     if not self.simulate:
       raw_input("Enter to continue. ")
     newscreen()
 
-  def ismonopoly(self, color, needed):
-    if color not in monopolizable:
+  def ismonopoly(self, group, needed):
+    """Checks if the Player has a monopoly on the given group type.
+      args:
+      group -- the string of the group type
+      needed -- the number of total properties in that group type
+      Returns false if the group type is not monopolizeable.
+      Returns true if Player owns all properties in that group type.
+      Returns false if Player does not own all properties in that group type.
+    """  
+    if group not in monopolizable:
       return False
-    elif len(self.owned[color]) == needed:
-      print "%s has a monopoly on %s!" % (self, color) 
+    elif len(self.owned[group]) == needed:
+      print "%s has a monopoly on %s!" % (self, group) 
       return True
+    else:
+      return False
 
   def hasmonopoly(self):
+    """Calls self.ismonopoly() for all group types owned."""
     for key in self.owned.keys():
       needed = Property.available[key]
       self.ismonopoly(key, needed) 
  
   def rentorbuy(self, place):
+    """Checks if a property is owned, and then either pays rent or buys."""
     targetproperty = board[place]
     propertyowner = targetproperty.owner
     if (targetproperty in sum(self.owned.values(), [])):
@@ -71,6 +104,10 @@ class Player:
       self.buy(targetproperty)
 
   def doublesjail(self, die1, die2):
+    """Takes dice rolled and checks if the user has rolled dice 3 times.
+      args:
+      die1, die2 -- dice that were rolled for this given turn
+    """
     if die1 == die2:
       if self.doublesrecord == 2:
         "You got doubles a third time! You go straight to jail!"
@@ -87,6 +124,9 @@ class Player:
       return False
  
   def roll(self):
+    """Rolls dice and then calls self.advance() to go to that function.
+      If doubles is rolled a third time, Player goes directly to jail and does not advance.
+    """
     self.checkbalance()
     propertiesowned(self)
     self.hasmonopoly()
@@ -103,6 +143,10 @@ class Player:
     self.advance(self.position + dice, doubles=doubles)
 
   def land(self, doubles):
+    """Determines what to do when landing on a given space.
+      args:
+      doubles -- if True, self.roll() is called again at the end of this function
+    """
     if self.position in board.keys():
       currentspot = board[self.position]
       print "Landed on %s." % (currentspot)
@@ -144,17 +188,26 @@ class Player:
       self.roll()
      
   def jailed(self):
+    """Function that places user in jail and sets their jailtime to 3 turns."""
     self.jailtime = 2
     self.position = 10 
     print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
 
   def totalassets(self):
+    """Values the user's total assets for the income tax space."""
     assets = self.money
     for place in sum(self.owned.values(), []):
       assets += place.price
     return assets
   
   def advance(self, location, doubles=False):
+    """Advances to the given location.
+      If passing go, user receives $200
+      args:
+      location -- numerical space [0,39] on board where advancing to.
+      kwargs:
+      doubles -- If True, then passes argument to self.land() function.
+    """
     location = location % 40 
     if location >= self.position:
       self.position = location
@@ -192,6 +245,9 @@ class Player:
     place.purchased(self)
 
   def buy(self, place):
+    """If the user does not already own the property, no one else owns property, 
+      and user has enough money, then user can buy property.
+    """
     if (place in sum(self.owned.values(), [])):
       return "%s already owns this property!" % (self)
     elif place.owner:

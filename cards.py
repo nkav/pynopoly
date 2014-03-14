@@ -1,4 +1,10 @@
+#!/usr/bin/env python
+""" 
+cards.py - Chance and Community Chest functionality for monpoly.
+"""
+
 from board import board
+
 
 def card(cardinfo):
   print "Your card was %s" % (cardinfo)

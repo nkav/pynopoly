@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+""" 
+probability.py - probability for dice rolling, chancecards, and communitychestcards 
+"""
 import random
 
 def die():
