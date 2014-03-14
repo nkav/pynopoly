@@ -1,9 +1,10 @@
+from graphics import newscreen
 from board import board
 from player import Player
 
 class Monopoly:
   players = []
-  turns = 100  
+  turns = 10  
  
   def __init__(self, players, turns):
     self.players = players
@@ -13,16 +14,19 @@ class Monopoly:
     for player in self.players:
       if (not player.bankrupt):
         if(not player.servetime()):
+          print ("%s's turn." % (player))
           player.roll() 
+        else:
+          player.jailtimeleft()
   
   def start(self):
     for i in xrange(self.turns):
+      newscreen()
       print "Now starting turn %d." % (i)
       self.nextturn()
 
-
-
 if __name__ == '__main__':
-  main = Player("Main Player") 
-  newgame = Monopoly([main], 100)
+  main = Player("Nilesh") 
+  player2 = Player("New Player") 
+  newgame = Monopoly([main, player2], 100)
   newgame.start()

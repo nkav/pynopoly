@@ -1,5 +1,21 @@
-from termcolor import cprint
+from termcolor import cprint, colored
 import sys
+
+def newscreen():
+  print '\n' * 22
+
+def propertiesowned(properties):
+  places = sum(properties.values(), [])
+  coloredplaces = []
+  for place in places:
+    if place.bg:
+      coloredplaces.append(colored(place.name, place.text, place.bg))
+    else:
+      coloredplaces.append(colored(place.name, place.text))
+  if places:
+    print "You own the following properties: " + ", ".join(coloredplaces) + "."
+  else:
+    print "You don't own any properties yet."
 
 def printboard():
   cprint (u"G", 'green', 'on_yellow', end= ' ') 
@@ -8,10 +24,10 @@ def printboard():
   cprint(u"\u2588", 'blue', 'on_red', end='')
   print u"\u2588", 
   print u"R ", 
-  cprint(u"\u2588", 'blue', 'on_grey', end='')
+  cprint(u"\u2588", 'blue', 'on_white', end='')
   print u"c ", 
-  cprint(u"\u2588", 'blue', 'on_grey', end=' ')
-  cprint(u"\u2588", 'blue', 'on_grey', end='')
+  cprint(u"\u2588", 'blue', 'on_white', end=' ')
+  cprint(u"\u2588", 'blue', 'on_white', end='')
   print u"j ", 
   cprint(u"\u2588", 'magenta', end='')
   print u"\u2588 ", 
