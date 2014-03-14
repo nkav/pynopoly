@@ -78,7 +78,10 @@ class Player:
     print "%s rolled a %d and %d to get %d." % (self, die1, die2, dice)
     if self.doublesjail(die1, die2):
       return None
-    self.advance(self.position + dice)
+    doubles = die1 == die2
+    self.advance(self.position + dice, doubles=doubles)
+
+  def land(self, doubles):
     if self.position in board.keys():
       currentspot = board[self.position]
       print "Landed on %s." % (currentspot)
@@ -106,7 +109,7 @@ class Player:
     self.checkbalance()  
     raw_input("Enter to continue. ")
     newscreen()
-    if (die1 == die2):
+    if doubles:
       print "Roll again!"
       self.roll()
      
@@ -121,7 +124,7 @@ class Player:
       assets += place.price
     return assets
   
-  def advance(self, location):
+  def advance(self, location, doubles=False):
     location = location % 40 
     if location >= self.position:
       self.position = location
@@ -132,6 +135,7 @@ class Player:
       self.checkbalance()
     printboard()
     printplayer('X', self.position) 
+    self.land(doubles)
         
   def checkbalance(self):
     print "Your current balance is $%d." % (self.money)
