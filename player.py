@@ -3,13 +3,13 @@
 player.py - creates functions for a Player 
 """
 
-from probability import die, chancecard, communitychestcard
+from probability import die
 from graphics import printplayer, printboard, newscreen, propertiesowned, sectionbreak
 import math
 from board import board, chances, communitychests, monopolizable
 from property import Property
 import copy
-from cards import chance, communitychest
+import cards
 
 class Player:
   """Monopoly player"""
@@ -155,14 +155,16 @@ class Player:
       print "You landed on Chance!"
       if not self.simulate:
         raw_input("Enter to draw a card. ")
-      x = chancecard()
-      chance[x](self)
+      cards.chance[cards.chanceindex](self)
+      cards.chanceindex += 1
+      cards.chanceindex %= len(cards.chance)
     elif self.position in communitychests:
       print "You landed on Community Chest!"
       if not self.simulate:
         raw_input("Enter to draw a card. ")
-      x = communitychestcard()
-      communitychest[x](self)
+      cards.communitychest[cards.communityindex](self)
+      cards.communityindex += 1
+      cards.communityindex %= len(cards.communitychest)
     elif self.position == 30:
       print "You landed on Go to Jail!"
       self.jailed()

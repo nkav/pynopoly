@@ -1,10 +1,21 @@
 #!/usr/bin/env python
 """ 
 cards.py - Chance and Community Chest functionality for monpoly.
-"""
 
+To be implemented:
+  getoutofjail,
+  birthday, # collect 50 from each player
+  opera, # 50 from each player for opening night
+  streetrepairs,
+  getoutofjail,
+  repairs,
+  youpay50,
+"""
+from random import shuffle
 from board import board
 
+chanceindex = 0
+communityindex = 0
 
 def card(cardinfo):
   print "Your card was %s" % (cardinfo)
@@ -86,12 +97,6 @@ chance = [
   crossword,
 ]
 
-"""To be implemented:
-  getoutofjail,
-  repairs,
-  youpay50,
-"""
-
 def bankerror(player):
   card("to collect $75 from a bank error in your favor!")
   player.money += 75 
@@ -152,10 +157,5 @@ communitychest = [
   holidayfund,  
 ]
 
-
-"""To be implemented:
-  getoutofjail,
-  birthday, # collect 50 from each player
-  opera, # 50 from each player for opening night
-  streetrepairs,
-"""
+shuffle(chance)
+shuffle(communitychest)
