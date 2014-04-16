@@ -40,7 +40,7 @@ class Property:
     """Charges rent depending on monopoly.
       If owner owns all properties of a given color, he/she is able to charge twice the rent.
     """ 
-    if self.owner.ismonopoly(self.group, Property.available[self.group]):
+    if self.owner.ismonopoly(self.group):
       print "You owe twice the rent since %s owns a monopoly!" % (self.owner)
       return 2*self.rent 
     return self.rent    

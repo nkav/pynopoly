@@ -68,18 +68,17 @@ class Player:
       raw_input("Enter to continue. ")
     newscreen()
 
-  def ismonopoly(self, group, needed):
+  def ismonopoly(self, group):
     """Checks if the Player has a monopoly on the given group type.
       args:
       group -- the string of the group type
-      needed -- the number of total properties in that group type
       Returns false if the group type is not monopolizeable.
       Returns true if Player owns all properties in that group type.
       Returns false if Player does not own all properties in that group type.
     """  
     if group not in monopolizable:
       return False
-    elif len(self.owned[group]) == needed:
+    elif len(self.owned[group]) == Property.available[group]:
       print "%s has a monopoly on %s!" % (self, group) 
       return True
     else:
@@ -88,8 +87,7 @@ class Player:
   def hasmonopoly(self):
     """Calls self.ismonopoly() for all group types owned."""
     for key in self.owned.keys():
-      needed = Property.available[key]
-      self.ismonopoly(key, needed) 
+      self.ismonopoly(key) 
  
   def rentorbuy(self, place):
     """Checks if a property is owned, and then either pays rent or buys."""
