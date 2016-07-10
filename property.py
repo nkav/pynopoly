@@ -3,6 +3,8 @@
 property.py - the basic class for a Property, as well as for the RailroadProperty
 """
 
+# TODO: implement correct utility property rent, mortgaging
+
 class Property:
   name = ""
   price = 0 
@@ -11,6 +13,7 @@ class Property:
   group = ''
   text = 'white'
   bg = None
+  houses = 0
   
   #number of total available properties for each group type
   available = {
@@ -24,26 +27,32 @@ class Property:
     'yellows': 3,
     'greens': 3,
     'blues': 2 
-  } 
-  def __init__(self, name, group, price):
-    self.name = name
-    self.price = price
-    self.group = group
+  }
+
+  def __init__(self, data):
+    self.name = data['name']
+    self.price = data['price']
+    self.group = data['group']
     self.owner = None 
-    self.rent = (price/10) - 4
-    self.determinecolor()   
+    self.houses = 0
+    self.rent = data['rent'] 
 
   def __repr__(self):
     return self.name
 
-  def chargerent(self):
+  def add_house(self):
+    self.houses += 1
+
+  def get_rent(self):
     """Charges rent depending on monopoly.
       If owner owns all properties of a given color, he/she is able to charge twice the rent.
     """ 
-    if self.owner.ismonopoly(self.group):
-      print "You owe twice the rent since %s owns a monopoly!" % (self.owner)
-      return 2*self.rent 
-    return self.rent    
+    
+    if self.owner.is_monopoly(self.group) and not self.houses:
+      # special case if there is an undeveloped monopoly
+      return self.rent[0]*2
+    else:
+      return self.rent[self.houses]  
 
   def purchased(self, person):
     """Allows a given Player to purchase a card."""
@@ -53,34 +62,21 @@ class Property:
     """Allows a given Player to sell the card back to the Bank."""
     self.owner = None 
   
-  def determinecolor(self):
-    #Determines the colors needed for the property when printing to terminal. 
-    if self.group == 'purples':
-      self.text = 'blue'
-      self.bg = 'on_red'
-    elif self.group == 'lightblues':
-      self.text = 'blue' 
-      self.bg = 'on_white'
-    elif self.group == 'magentas':
-      self.text = 'magenta' 
-    elif self.group == 'oranges':
-      self.text = 'red'
-      self.bg = 'on_yellow'
-    elif self.group == 'reds':
-      self.text = 'red'
-    elif self.group == 'yellows':
-      self.text = 'yellow'
-    elif self.group == 'greens':
-      self.text = 'green'
-    elif self.group == 'blues':
-      self.text = 'blue'
-    else:
-      self.text = 'white'
-
 class RailroadProperty(Property):
-  def chargerent(self):
+  def __init__(self, name):
+    self.name = name
+    self.price = 200
+    self.group = 'railroads'
+    self.owner = None
+    self.rent = {
+      1: 25,
+      2: 50,
+      3: 100,
+      4: 200
+    }
+
+  def get_rent(self):
     if self.owner:
-      self.rent = len(self.owner.owned['railroads'])*25 
-      return self.rent
+      return self.rent[len(self.owner.owned_by_group['railroads'])]
     else:
-      return self.rent
+      return self.rent[1]

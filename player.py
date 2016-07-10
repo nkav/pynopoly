@@ -3,10 +3,12 @@
 player.py - creates functions for a Player 
 """
 
+# TODO: include house/hotel value in properties
+
 from probability import die
-from graphics import printplayer, printboard, newscreen, propertiesowned, sectionbreak
+from graphics import print_player, print_board, new_screen, properties_owned, section_break
 import math
-from board import board, chances, communitychests, monopolizable
+from board import board, chances, community_chests, monopolizable
 from property import Property
 import copy
 import cards
@@ -19,18 +21,6 @@ class Player:
   position = 0 #Start at Go
   doublesrecord = 0 #Number of doubles at any given moment. 3 doubles means go to jail
   simulate = False #Faster version that defaults to buying property and skipping inputs
-  owned = {
-    'railroads': [],
-    'utilities': [],
-    'purples': [],
-    'lightblues': [],
-    'magentas': [],
-    'oranges': [],
-    'reds': [],
-    'yellows': [],
-    'greens': [],
-    'blues': []
-  } 
   
   def __init__(self, name, simulate=False):
     """Initialize new Player
@@ -42,7 +32,18 @@ class Player:
     """
     
     self.name = name
-    self.owned = copy.deepcopy(Player.owned)
+    self.owned_by_group = {
+      'railroads': [],
+      'utilities': [],
+      'purples': [],
+      'lightblues': [],
+      'magentas': [],
+      'oranges': [],
+      'reds': [],
+      'yellows': [],
+      'greens': [],
+      'blues': []
+    } 
     self.simulate = simulate
 
   def __repr__(self):
@@ -58,7 +59,7 @@ class Player:
       return True 
     return False 
 
-  def jailtimeleft(self):
+  def jail_time_left(self):
     """Replacement for user turn
       If a player is in jail, then this function will be called.
       It notifies the user how many more turns in needs to serve in Jail.
@@ -66,9 +67,9 @@ class Player:
     print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
     if not self.simulate:
       raw_input("Enter to continue. ")
-    newscreen()
+    new_screen()
 
-  def ismonopoly(self, group):
+  def is_monopoly(self, group):
     """Checks if the Player has a monopoly on the given group type.
       args:
       group -- the string of the group type
@@ -78,30 +79,40 @@ class Player:
     """  
     if group not in monopolizable:
       return False
-    elif len(self.owned[group]) == Property.available[group]:
+    elif len(self.owned_by_group[group]) == Property.available[group]:
       print "%s has a monopoly on %s!" % (self, group) 
       return True
     else:
       return False
 
   def hasmonopoly(self):
-    """Calls self.ismonopoly() for all group types owned."""
-    for key in self.owned.keys():
-      self.ismonopoly(key) 
+    """Calls self.is_monopoly() for all group types owned."""
+    for key in self.owned_by_group.keys():
+      if self.is_monopoly(key):
+        if not self.simulate:
+          response = raw_input("Would you like to buy a house for the %s? (Y/N)" %key) 
+        else:
+          response = 'Y'
+        if response == "Y":
+          color = self.owned_by_group[key] # [prop1, prop2, prop3] all in one color group
+          prop = sorted(color, key=lambda prop: prop.houses)[0]
+          prop.add_house()
+          self.pay(100, None)
+          print "You just bought a house on %s!" % prop.name 
  
-  def rentorbuy(self, place):
+  def rent_or_buy(self, place):
     """Checks if a property is owned, and then either pays rent or buys."""
     targetproperty = board[place]
     propertyowner = targetproperty.owner
-    if (targetproperty in sum(self.owned.values(), [])):
+    if (targetproperty in sum(self.owned_by_group.values(), [])):
       print "%s already owns %s!" % (self, targetproperty)
     elif propertyowner: 
       print "This property is already owned by by %s. %s must pay rent." % (propertyowner, self)
-      self.payrent(targetproperty)
+      self.pay_rent(targetproperty)
     else:
       self.buy(targetproperty)
 
-  def doublesjail(self, die1, die2):
+  def doubles_jail(self, die1, die2):
     """Takes dice rolled and checks if the user has rolled dice 3 times.
       args:
       die1, die2 -- dice that were rolled for this given turn
@@ -114,7 +125,7 @@ class Player:
         return True
       else:
         print "You got doubles! You get to roll again at the end."
-        print "If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord)
+        print "Reminder: If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord)
         self.doublesrecord += 1
         return False
     else:
@@ -125,17 +136,17 @@ class Player:
     """Rolls dice and then calls self.advance() to go to that function.
       If doubles is rolled a third time, Player goes directly to jail and does not advance.
     """
-    self.checkbalance()
-    propertiesowned(self)
+    self.check_balance()
+    properties_owned(self)
     self.hasmonopoly()
-    sectionbreak()
+    section_break()
     if not self.simulate:
       raw_input("Enter to roll. ")
     die1 = die()
     die2 = die()
     dice = die1 + die2 
     print "%s rolled a %d and %d to get %d." % (self, die1, die2, dice)
-    if self.doublesjail(die1, die2):
+    if self.doubles_jail(die1, die2):
       return None
     doubles = die1 == die2
     self.advance(self.position + dice, doubles=doubles)
@@ -146,23 +157,23 @@ class Player:
       doubles -- if True, self.roll() is called again at the end of this function
     """
     if self.position in board.keys():
-      currentspot = board[self.position]
-      print "Landed on %s." % (currentspot)
-      self.rentorbuy(self.position)
+      current_spot = board[self.position]
+      print "Landed on %s." % (current_spot)
+      self.rent_or_buy(self.position)
     elif self.position in chances:
       print "You landed on Chance!"
       if not self.simulate:
         raw_input("Enter to draw a card. ")
-      cards.chance[cards.chanceindex](self)
-      cards.chanceindex += 1
-      cards.chanceindex %= len(cards.chance)
-    elif self.position in communitychests:
+      cards.chance[cards.chance_index](self)
+      cards.chance_index += 1
+      cards.chance_index %= len(cards.chance)
+    elif self.position in community_chests:
       print "You landed on Community Chest!"
       if not self.simulate:
         raw_input("Enter to draw a card. ")
-      cards.communitychest[cards.communityindex](self)
-      cards.communityindex += 1
-      cards.communityindex %= len(cards.communitychest)
+      cards.communitychest[cards.community_index](self)
+      cards.community_index += 1
+      cards.community_index %= len(cards.communitychest)
     elif self.position == 30:
       print "You landed on Go to Jail!"
       self.jailed()
@@ -170,7 +181,8 @@ class Player:
       print "%s just landed on Go! Congrats!" % (self)            
     elif self.position == 4:
       print "You landed on Income Tax. You will be charged the lesser of $200 or 10% of your total assets."
-      self.pay(min(200, self.totalassets), None)
+      print "Your total assets: $" + str(self.total_assets())
+      self.pay(min(200, 0.1*self.total_assets()), None)
     elif self.position == 10:
       print "Landed on Jail - but just visiting!"
     elif self.position == 20:
@@ -178,11 +190,11 @@ class Player:
     elif self.position == 38:
       print "Landed on Luxury Tax. You'll need to pay $75!"
       self.pay(75, None)
-    self.checkbalance()  
-    sectionbreak()
+    self.check_balance()  
+    section_break()
     if not self.simulate:
       raw_input("Enter to continue. ")
-    newscreen()
+    new_screen()
     if doubles:
       print "Roll again!"
       self.roll()
@@ -193,10 +205,10 @@ class Player:
     self.position = 10 
     print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
 
-  def totalassets(self):
+  def total_assets(self):
     """Values the user's total assets for the income tax space."""
     assets = self.money
-    for place in sum(self.owned.values(), []):
+    for place in sum(self.owned_by_group.values(), []):
       assets += place.price
     return assets
   
@@ -204,27 +216,32 @@ class Player:
     """Advances to the given location.
       If passing go, user receives $200
       args:
-      location -- numerical space [0,39] on board where advancing to.
+      location mod 40 -- numerical space on board where advancing to.
       kwargs:
       doubles -- If True, then passes argument to self.land() function.
     """
-    location = location % 40 
-    if location >= self.position:
-      self.position = location
+    if location == 40:
+      self.position = 0
+      self.money += 400
+      print "Lucky you, you landed on Go! You collect $400!"  
+      self.check_balance()
+    elif location > 40:
+      self.position = location % 40
+      self.money += 200
+      print "You just passed Go and collected $400!"  
+      self.check_balance()
     else:
       self.position = location
-      self.money += 200
-      print "You just passed go and collected $200!"  
-      self.checkbalance()
-    printboard()
-    printplayer('X', self.position) 
+      
+    print_board()
+    print_player(self.name, self.position) 
     self.land(doubles)
         
-  def checkbalance(self):
+  def check_balance(self):
     print "%s's current balance is $%d." % (self, self.money)
 
-  def payrent(self, place):
-    rent = place.chargerent()  
+  def pay_rent(self, place):
+    rent = place.get_rent()  
     if(self.pay(rent, place.owner)):
       print "%s just paid $%d in rent to %s for landing on %s." % (self, rent, place.owner, place.name) 
     else:
@@ -240,28 +257,28 @@ class Player:
     else:
       return False
  
-  def addproperty(self, place):
-    self.owned[place.group].append(place)
+  def add_property(self, place):
+    self.owned_by_group[place.group].append(place)
     place.purchased(self)
 
   def buy(self, place):
     """If the user does not already own the property, no one else owns property, 
       and user has enough money, then user can buy property.
     """
-    if (place in sum(self.owned.values(), [])):
+    if (place in sum(self.owned_by_group.values(), [])):
       return "%s already owns this property!" % (self)
     elif place.owner:
       return "The property is already owned by %s." % (place.owner)
     else:
       response = ''
       if not self.simulate: 
-        while ((response != 'Y') and (response != 'N')):
+        while response not in ('Y', 'N'):
           response = raw_input("Will you buy %s for $%d? (Y/N) " % (place.name, place.price))
       else:
         response = 'Y'
       if (response == 'Y'):
         if (self.pay(place.price, None)):
-          self.addproperty(place)
+          self.add_property(place)
           print "%s just purchased %s for $%d." % (self, place.name, place.price)
         else:
           print "%s doesn't have enough money to purchase the property!" % (self)

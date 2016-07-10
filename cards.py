@@ -14,8 +14,8 @@ To be implemented:
 from random import shuffle
 from board import board
 
-chanceindex = 0
-communityindex = 0
+chance_index = 0
+community_index = 0
 
 def card(cardinfo):
   print "Your card was %s" % (cardinfo)

@@ -6,7 +6,7 @@ board.py - outlines the structure of the board
 from property import Property, RailroadProperty
 
 #spaces where user must draw a card
-communitychests = [2, 17, 33]
+community_chests = [2, 17, 33]
 chances = [7, 22, 36] 
 
 #groups that can be made into a monopoly
@@ -21,35 +21,342 @@ monopolizable = [
   'blues',
 ]
 
+prop_data = {
+  'mediterranean': {
+    'name': "Mediterranean Avenue",
+    'group': 'purples',
+    'price': 60,
+    'rent': {
+      0: 2,
+      1: 10,
+      2: 30,
+      3: 90,
+      4: 160,
+      5: 250
+    }
+  },
+  'baltic': {
+    'name': "Baltic Avenue",
+    'group': 'purples',
+    'price': 60,
+    'rent': {
+      0: 4,
+      1: 20,
+      2: 60,
+      3: 180,
+      4: 320,
+      5: 450
+    }
+  },
+  'oriental': {
+    'name': "Oriental Avenue",
+    'group': 'lightblues',
+    'price': 100,
+    'rent': {
+      0: 6,
+      1: 30,
+      2: 90,
+      3: 270,
+      4: 400,
+      5: 550
+    }
+  },
+  'vermont': {
+    'name': "Vermont Avenue",
+    'group': 'lightblues',
+    'price': 100,
+    'rent': {
+      0: 6,
+      1: 30,
+      2: 90,
+      3: 270,
+      4: 400,
+      5: 550
+    }
+  },
+  'connecticut' : {
+    'name': 'Connecticut Avenue', 
+    'group': 'lightblues', 
+    'price': 120,
+    'rent': {
+      0: 8, 
+      1: 40,  
+      2: 100,
+      3: 300, 
+      4: 450,
+      5: 600
+    },
+  },
+  'st_charles' : {
+    'name': 'St. Charles Place', 
+    'group': 'magentas', 
+    'price': 140,
+    'rent': {
+      0: 10,  
+      1: 50,  
+      2: 150,
+      3: 450, 
+      4: 625,
+      5: 750
+    },
+  },
+  'electric' : {
+    'name': 'Electric Company', 
+    'group': 'utilities', 
+    'price': 150,
+    'rent': {
+      0: 11,
+    }
+  },
+  'states' : {
+    'name': 'States Avenue', 
+    'group': 'magentas', 
+    'price': 140,
+    'rent': {
+      0: 10,  
+      1: 50,  
+      2: 150,
+      3: 450, 
+      4: 625,
+      5: 750
+    },
+  },
+  'virginia' : {
+    'name': 'Virginia Avenue', 
+    'group': 'magentas', 
+    'price': 160,
+    'rent': {
+      0: 12,  
+      1: 60,  
+      2: 180,
+      3: 500, 
+      4: 700,
+      5: 900
+    },
+  },
+  'st_james' : {
+    'name': 'St. James Place', 
+    'group': 'oranges', 
+    'price': 180,
+    'rent': {
+      0: 14,  
+      1: 70,  
+      2: 200,
+      3: 550, 
+      4: 750,
+      5: 950
+    },
+  },
+  'tennessee' : {
+    'name': 'Tennessee Avenue', 
+    'group': 'oranges', 
+    'price': 180,
+    'rent': {
+      0: 14,  
+      1: 70,  
+      2: 200,
+      3: 550, 
+      4: 750,
+      5: 950
+    },
+  },
+  'new_york' : {
+    'name': 'New York Avenue', 
+    'group': 'oranges', 
+    'price': 200,
+    'rent': {
+      0: 16,  
+      1: 80,  
+      2: 220,
+      3: 600, 
+      4: 800,
+      5: 1000
+    },
+  },
+  'kentucky' : {
+    'name': 'Kentucky Avenue', 
+    'group': 'reds', 
+    'price': 220,
+    'rent': {
+      0: 18,  
+      1: 90,  
+      2: 250,
+      3: 700, 
+      4: 875,
+      5: 1050
+    },
+  },
+  'indiana' : {
+    'name': 'Indiana Avenue', 
+    'group': 'reds', 
+    'price': 220,
+    'rent': {
+      0: 18,  
+      1: 90,  
+      2: 250,
+      3: 700, 
+      4: 875,
+      5: 1050
+    },
+  },
+  'illinois' : {
+    'name': 'Illinois Avenue', 
+    'group': 'reds', 
+    'price': 240,
+    'rent': {
+      0: 20,  
+      1: 100, 
+      2: 300,
+      3: 750, 
+      4: 925,
+      5: 1100
+    },
+  },
+  'atlantic' : {
+    'name': 'Atlantic Avenue', 
+    'group': 'yellows', 
+    'price': 260,
+    'rent': {
+      0: 22,  
+      1: 110, 
+      2: 330,
+      3: 800, 
+      4: 975,
+      5: 1150
+    },
+  },
+  'ventnor' : {
+    'name': 'Ventnor Avenue', 
+    'group': 'yellows', 
+    'price': 260,
+    'rent': {
+      0: 22,  
+      1: 110, 
+      2: 330,
+      3: 800, 
+      4: 975,
+      5: 1150
+    },
+    
+  },
+  'water' : {
+    'name': 'Water Works', 
+    'group': 'utilities', 
+    'price': 150,
+    'rent': {
+      0: 11 #placeholder
+    }
+  },
+  'marvin' : {
+    'name': 'Marvin Gardens',
+    'group': 'yellows', 
+    'price': 280,
+    'rent': {
+      0: 24,  
+      1: 120, 
+      2: 360,
+      3: 850, 
+      4: 1025,
+      5:  1200
+    },
+  },
+  'pacific' : {
+    'name': 'Pacific Avenue', 
+    'group': 'greens', 
+    'price': 300,
+    'rent': {
+      0: 26,  
+      1: 130, 
+      2: 390,
+      3: 900, 
+      4: 1100,
+      5:  1275
+    },
+  },
+  'north_carolina' : {
+    'name': 'North Carolina Avenue', 
+    'group': 'greens', 
+    'price': 300,
+    'rent': {
+      0: 26,  
+      1: 130, 
+      2: 390,
+      3: 900, 
+      4: 1100,
+      5:  1275
+    },
+  },
+  'pennsylvania' : {
+    'name': 'Pennsylvania Avenue', 
+    'group': 'greens', 
+    'price': 320,
+    'rent': {
+      0: 28,  
+      1: 150, 
+      2: 450,
+      3: 1000,  
+      4: 1200,
+      5:  1400
+    },
+    
+  },
+  'park' : {
+    'name': 'Park Place', 
+    'group': 'blues', 
+    'price': 350,
+    'rent': {
+      0: 35,  
+      1: 175, 
+      2: 500,
+      3: 1100,  
+      4: 1300,
+      5:  1500
+    },
+  },
+  'boardwalk' : {
+    'name': 'Boardwalk', 
+    'group': 'blues',
+    'price':  40,
+    'rent': {
+      0: 50,  
+      1: 200, 
+      2: 600,
+      3: 1400,  
+      4: 1700,
+      5:  2000
+    },
+  }
+}
+
 #dictionary binding of board indices [0,39] to Property types
-#card spaces, tax spaces, jail, etc. are handled by the Player's self.land() function
+#card spaces, tax spaces, jail, etc. are handled by Player.land()
 board = {
-  1:  Property('Mediterranean Avenue', 'purples', 60),
-  3:  Property('Baltic Avenue', 'purples', 60),
-  5:  RailroadProperty('Reading Railroad', 'railroads', 200),
-  6:  Property('Oriental Avenue', 'lightblues', 100),
-  8:  Property('Vermont Avenue', 'lightblues', 100),
-  9:  Property('Connecticut Avenue', 'lightblues', 120),
-  11: Property('St. Charles Place', 'magentas', 140),
-  12: Property('Electric Company', 'utilities', 150),
-  13: Property('States Avenue', 'magentas', 140),
-  14: Property('Virginia Avenue', 'magentas', 160),
-  15: RailroadProperty('Pennsylvania Railroad', 'railroads', 200),
-  16: Property('St. James Place', 'oranges', 180),
-  18: Property('Tennessee Avenue', 'oranges', 180),
-  19: Property('New York Avenue', 'oranges', 200),
-  21: Property('Kentucky Avenue', 'reds', 220),
-  23: Property('Indiana Avenue', 'reds', 220),
-  24: Property('Illinois Avenue', 'reds', 240),
-  25: RailroadProperty('B&O Railroad', 'railroads', 200),
-  26: Property('Atlantic Avenue', 'yellows', 260),
-  27: Property('Ventnor Avenue', 'yellows', 260),
-  28: Property('Water Works', 'utilities', 150),
-  29: Property('Marvin Gardens', 'yellows', 280),
-  31: Property('Pacific Avenue', 'greens', 300),
-  32: Property('North Carolina Avenue', 'greens', 300),
-  34: Property('Pennsylvania Avenue', 'greens', 320),
-  35: RailroadProperty('Short Line', 'railroads', 200),
-  37: Property('Park Place', 'blues', 350),
-  39: Property('Boardwalk', 'blues', 400)
+  1:  Property(prop_data['mediterranean']),
+  3:  Property(prop_data['baltic']),
+  5:  RailroadProperty('Reading Railroad'),
+  6:  Property(prop_data['oriental']),
+  8:  Property(prop_data['vermont']),
+  9:  Property(prop_data['connecticut']),
+  11: Property(prop_data['st_charles']),
+  12: Property(prop_data['electric']),
+  13: Property(prop_data['states']),
+  14: Property(prop_data['virginia']),
+  15: RailroadProperty('Pennsylvania Railroad'),
+  16: Property(prop_data['st_james']),
+  18: Property(prop_data['tennessee']),
+  19: Property(prop_data['new_york']),
+  21: Property(prop_data['kentucky']),
+  23: Property(prop_data['indiana']),
+  24: Property(prop_data['illinois']),
+  25: RailroadProperty('B&O Railroad'),
+  26: Property(prop_data['atlantic']),
+  27: Property(prop_data['ventnor']),
+  28: Property(prop_data['water']),
+  29: Property(prop_data['marvin']),
+  31: Property(prop_data['pacific']),
+  32: Property(prop_data['north_carolina']),
+  34: Property(prop_data['pennsylvania']),
+  35: RailroadProperty('Short Line'),
+  37: Property(prop_data['park']),
+  39: Property(prop_data['boardwalk'])
 }

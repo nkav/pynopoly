@@ -6,31 +6,83 @@ graphics.py - functions for the primitive terminal interface.
 from termcolor import cprint, colored
 import os,sys
 
-def newscreen():
+def new_screen():
   #clears screen
   os.system('cls' if os.name == 'nt' else 'clear')
 
-def sectionbreak():
+def section_break():
   #logical breaks between sections so text is not distracting
   print '*' * 70
 
 
-def propertiesowned(player):
+group_colors = {
+  'purples': 
+    {
+      'text': 'blue',
+      'bg': 'on_red'
+    }, 
+  'lightblues': 
+    {
+      'text': 'blue', 
+      'bg': 'on_white'
+    },
+  'magentas': 
+    {
+      'text': 'magenta'
+    },
+  'oranges': 
+    {
+      'text': 'red',
+      'bg': 'on_yellow'
+    },
+  'reds': 
+    {
+      'text': 'red'
+    },
+  'yellows': 
+    {
+      'text': 'yellow'
+    },
+  'greens': 
+    {
+      'text': 'green'
+    },
+  'blues': 
+    {
+      'text': 'blue'
+    },
+  'railroads': 
+    {
+      'text': 'white'
+    },
+  'utilities': 
+    {
+      'text': 'white'
+    }
+}
+
+
+def properties_owned(player):
   #Prints all the properties the user owns and colors them appropriately.
-  places = sum(player.owned.values(), [])
-  coloredplaces = []
-  for place in places:
-    if place.bg:
-      coloredplaces.append(colored(place.name, place.text, place.bg))
+  colored_places = []
+
+  for group, properties in player.owned_by_group.iteritems():
+    group_color = group_colors[group]
+    if 'bg' in group_color:
+      for place in properties:
+        colored_places.append(colored(place.name, group_color['text'], group_color['bg']))
     else:
-      coloredplaces.append(colored(place.name, place.text))
-  if places:
-    print "%s owns the following properties: " % (player) + ", ".join(coloredplaces) + "."
+      for place in properties:
+        colored_places.append(colored(place.name, group_color['text']))
+  if colored_places:
+    print "%s owns the following properties: " % (player) + ", ".join(colored_places) + "."
   else:
     print "%s doesn't own any properties yet." % (player)
 
-def printboard():
-  # A linear rendition of the board with each space colored appropriately.
+
+
+def print_board():
+  # A linear rendering of the board with each space colored appropriately.
   cprint (u"G", 'green', 'on_yellow', end= ' ') 
   cprint(u"\u2588", 'blue', 'on_red', end=' ')
   print u"C ", 
@@ -72,6 +124,12 @@ def printboard():
   print u"\u2588 ", 
   cprint(u"\u2588", 'blue', end='\n')
 
-def printplayer(symbol, position):
-  # Prints the players location on the board according to printboard()
-  sys.stdout.write(" "*(position)*2 + symbol + '\n')
+
+def print_everything(players):
+  print_board()
+  for player in players:
+    print_player(player.name, player.position)
+
+def print_player(name, position):
+  # Prints the players location on the board according to print_board()
+  sys.stdout.write(" "*((position)*2) + "^ " + name + '\n')
