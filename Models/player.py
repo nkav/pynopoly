@@ -6,7 +6,6 @@ player.py - creates functions for a Player
 # TODO: include house/hotel value in properties
 
 from probability import die
-from graphics import print_player, print_board, new_screen, properties_owned, section_break
 import math
 from board import board, chances, community_chests, monopolizable
 from Models.property import Property
@@ -15,7 +14,7 @@ class Player:
   """Monopoly player"""
   
   
-  def __init__(self, name, simulate=False):
+  def __init__(self, name, order, ui, simulate=False):
     """Initialize new Player
       args:
       name -- string of the player's name
@@ -30,6 +29,8 @@ class Player:
     self.doublesrecord = 0 #Number of doubles at any given moment. 3 doubles means go to jail
     self.simulate = simulate #Faster version that defaults to buying property and skipping inputs
     self.name = name
+    self.ui = ui
+    self.order = order
     self.owned_by_group = {
       'railroads': [],
       'utilities': [],
@@ -63,10 +64,7 @@ class Player:
       If a player is in jail, then this function will be called.
       It notifies the user how many more turns in needs to serve in Jail.
     """
-    print "%s is now in jail. You have %d more turns in jail." % (self, self.jailtime)
-    if not self.simulate:
-      raw_input("Enter to continue. ")
-    new_screen()
+    self.ui.print_message("%s is now in jail. You have %d more turns in jail." % (self, self.jailtime))
 
   def is_monopoly(self, group):
     """Checks if the Player has a monopoly on the given group type.
@@ -79,35 +77,87 @@ class Player:
     if group not in monopolizable:
       return False
     elif len(self.owned_by_group[group]) == Property.available[group]:
-      print "%s has a monopoly on %s!" % (self, group) 
+      self.ui.print_message("%s has a monopoly on %s!" % (self, group))
       return True
     else:
       return False
 
-  def hasmonopoly(self):
+  def develop_monopolies(self):
     """Calls self.is_monopoly() for all group types owned."""
-    for key in self.owned_by_group.keys():
-      if self.is_monopoly(key):
+
+    for color in self.owned_by_group.keys():
+      if self.is_monopoly(color):
         if not self.simulate:
-          response = raw_input("Would you like to buy a house for the %s? (Y/N)" %key) 
+          response = self.ui.raw_input("Would you like to buy or sell house(s) for the %s? (B)uy/(S)ell/(N)o [No]" % color) 
+          if response in ("B", "Buy", ""):
+            while True:
+              num_houses = self.ui.raw_input("How many houses would you like to buy for the %s?" % color)
+              if num_houses.isdigit():
+                self.buy_houses(color, int(num_houses))
+                break
+              else:
+                self.ui.print_message("That was not a number. Let's try that again.")
+          elif response in ("S", "Sell"):
+            while True:
+              num_houses = self.ui.raw_input("How many houses would you like to sell for the %s?" % color)
+              if num_houses.isdigit():
+                self.sell_houses(color, int(num_houses))
+                break
+              else:
+                self.ui.print_message("That was not a number. Let's try that again.")
         else:
-          response = 'Y'
-        if response == "Y":
-          color = self.owned_by_group[key] # [prop1, prop2, prop3] all in one color group
-          # TODO: allow user to choose which property to develop
-          prop = sorted(color, key=lambda prop: prop.houses)[0] # develops evenly
-          prop.add_house()
+          # TODO: override this function with AI class
+          color_props = self.owned_by_group[color] # [prop1, prop2, prop3] all in one color group
+          total_houses = sum(prop.houses for prop in color_props)
+          max_houses = 5 * len(color_props)
+          houses_to_buy = max_houses - total_houses
+          if houses_to_buy:
+            self.buy_houses(color, houses_to_buy)
           
  
-  def rent_or_buy(self, place):
-    """Checks if a property is owned, and then either pays rent or buys."""
-    if place.owner == self:
-      print "%s already owns %s!" % (self, place.name)
-    elif place.owner: 
-      print "This property is already owned by by %s. %s must pay rent." % (place.owner, self)
-      self.pay_rent(place)
-    else:
-      self.buy(place)
+  def buy_houses(self, color, num_houses):
+    sorted_props = sorted(self.owned_by_group[color], key=lambda prop: prop.houses) #builds evenly from least developed
+    num_of_props = Property.available[color]
+    prop_index = 0
+    houses_added = 0
+    while num_houses:
+      place = sorted_props[prop_index]
+      if 1 + place.houses <= 5:
+        if self.can_pay(place.house_price()):
+          self.pay(place.house_price(), None)
+          place.add_house()
+          houses_added += 1
+          num_houses -= 1
+          prop_index += 1
+          prop_index %= num_of_props
+        else:
+          self.ui.print_message("You don't have enough money!")
+          break
+      else:
+        self.ui.print_message("Your properties are already fully developed on %s!" % (color))
+        break
+    self.ui.print_message("You just bought %d house(s) on the %s!" % (houses_added, color))
+    self.check_balance()
+
+  def sell_houses(self, color, num_houses):
+    sorted_props = sorted(self.owned_by_group[color], key=lambda prop: prop.houses, reverse=True) #removes evenly from most developed
+    prop_index = 0
+    num_of_props = Property.available[color]
+    houses_sold = 0
+    while num_houses:
+      place = sorted_props[prop_index]
+      if place.houses - 1 >= 0:
+        self.earn(place.house_price() * 0.5)
+        place.remove_house()
+        houses_sold += 1
+        num_houses -= 1
+        prop_index += 1
+        prop_index %= num_of_props
+      else:
+        self.ui.print_message("You don't have any more houses to sell!")
+        break
+    self.ui.print_message("You've successfully sold %d house(s() on %s." (houses_sold, color))
+
 
   def doubles_jail(self, die1, die2):
     """Takes dice rolled and checks if the user has rolled dice 3 times.
@@ -121,8 +171,8 @@ class Player:
         self.send_to_jail()
         return True
       else:
-        print "You got doubles! You get to roll again at the end."
-        print "Reminder: If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord)
+        self.ui.print_message("You got doubles! You get to roll again at the end.")
+        self.ui.print_message("Reminder: If you roll doubles %d more time(s) then you go to jail." % (2 - self.doublesrecord))
         self.doublesrecord += 1
         return False
     else:
@@ -133,16 +183,15 @@ class Player:
     """Rolls dice and then calls self.advance() to go to that function.
       If doubles is rolled a third time, Player goes directly to jail and does not advance.
     """
+    self.ui.print_message("%s's turn." % (self))
     self.check_balance()
-    properties_owned(self)
-    self.hasmonopoly()
-    section_break()
+    self.develop_monopolies()
     if not self.simulate:
-      raw_input("Enter to roll. ")
+      self.ui.raw_input("Enter to roll. ")
     die1 = die()
     die2 = die()
     dice = die1 + die2 
-    print "%s rolled a %d and %d to get %d." % (self, die1, die2, dice)
+    self.ui.print_message("%s rolled a %d and %d to get %d." % (self, die1, die2, dice))
     if self.doubles_jail(die1, die2):
       return None
     doubles = die1 == die2
@@ -154,13 +203,9 @@ class Player:
       doubles -- if True, self.roll() is called again at the end of this function
     """
     current_spot = board[self.position]
-    current_spot.handle_land(self, roll)   
-    section_break()
-    if not self.simulate:
-      raw_input("Enter to continue. ")
-    new_screen()
+    current_spot.handle_land(self, roll, self.ui)   
     if doubles:
-      print "Roll again!"
+      self.ui.print_message("Roll again!")
       self.roll()
      
 
@@ -189,54 +234,67 @@ class Player:
     """
     if location == 40:
       self.position = 0
-      print "Lucky you, you landed on Go! You collect $400!" 
+      self.ui.print_message("Lucky you, you landed on Go! You collect $400!" )
       self.earn(400)
     elif location > 40:
       self.position = location % 40
-      print "You just passed Go and collected $200!"  
+      self.ui.print_message("%s just passed Go and collected $200!"  % self)
       self.earn(200)
     elif location < 0:
       self.position = 40 + location
     else:
       self.position = location
       
-    print_board()
-    print_player(self.name, self.position) 
+    self.ui.refresh_players() 
     self.land(doubles, roll=roll)
         
   def check_balance(self):
-    print "%s's current balance is $%d." % (self, self.money)
-
-  def pay_rent(self, place):
-    if place.mortgaged:
-      print "%s is mortgaged! %s does not have to pay %s anything." % (place, self, place.owner)
-    else:
-      rent = place.get_rent()
-      print "Rent for %s is $%d" % (place, rent)
-      if self.pay(rent, place.owner):
-        print "%s just paid $%d in rent to %s for landing on %s." % (self, rent, place.owner, place.name) 
-      else:
-        print "%s doesn't have enough money to pay rent! You are out of the game." % (self)
-        self.bankrupt = True
+    self.ui.print_message("%s's current balance is $%d." % (self, self.money))
+    
   
   def earn(self, money):
-    self.money += 400
+    self.money += money
     self.check_balance()
+
+
+  def can_pay(self, amount):
+    return self.money >= amount
 
   def pay(self, amount, owner):
     if self.money >= amount:
       self.money -= amount
       self.check_balance()
       if owner:
-        owner.money += amount
+        owner.earn(amount)
+        self.ui.print_message("%s just paid $%d to %s." % (self, amount, owner))
       # if no owner money is paid to the bank
-      return True 
     else:
-      return False
+      self.ui.print_message("%s doesn't have enough money to pay %s! %s is out of the game." % (self, owner, self))
+      self.bankrupt = True
  
   def add_property(self, place):
     self.owned_by_group[place.group].append(place)
-    place.purchased(self)
+    place.purchase(self)
+    self.ui.print_board()
+    self.ui.print_message("%s just purchased %s for $%d." % (self, place.name, place.price))
+
+  def mortgage_property(self, place):
+    if not property.is_mortgaged():
+      property.mortgage()
+      self.ui.print_message("You have now mortgaged %s for $%d!" (place, place.mortgage_value()))
+      player.earn(property.mortgage_value())
+    else:
+      self.ui.print_message("%s is already mortgaged!" % place)
+
+
+  def unmortgage_property(self, place):
+    if property.is_mortgaged():
+      if self.can_pay(property.price_to_unmortgage):
+        self.pay(property.price_to_unmortgage, None)
+        property.unmortgage()
+        self.ui.print_message("You have now unmortgaged %s for $%d!" (place, property.price_to_unmortgage))
+    else:
+      self.ui.print_message("%s is already mortgaged!" % place)
 
   def buy(self, place):
     """If the user does not already own the property, no one else owns property, 
@@ -245,12 +303,12 @@ class Player:
     response = ''
     if not self.simulate: 
       while response not in ('Y', 'N'):
-        response = raw_input("Will you buy %s for $%d? (Y/N) " % (place.name, place.price))
+        response = self.ui.raw_input("Will you buy %s for $%d? (Y/N) " % (place.name, place.price))
     else:
       response = 'Y'
     if (response == 'Y'):
-      if (self.pay(place.price, None)):
+      if self.can_pay(place.price):
         self.add_property(place)
-        print "%s just purchased %s for $%d." % (self, place.name, place.price)
+        self.pay(place.price, None)
       else:
-        print "%s doesn't have enough money to purchase the property!" % (self)
+        self.ui.print_message("%s doesn't have enough money to purchase the property!" % (self))

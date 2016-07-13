@@ -2,10 +2,10 @@
 """ 
 pynopoly.py - creates and simulates a game of Monopoly 
 """
-import sys, getopt
+import sys, getopt, curses
 
 from tabulate import tabulate
-from graphics import new_screen, print_everything, section_break
+from curses_ui import CursesUI
 from board import board
 from Models.player import Player
 
@@ -20,9 +20,10 @@ __status__ = "Development"
 
 class Pynopoly:
 
-  def __init__(self, players, turns):
+  def __init__(self, players, turns, ui):
     self.players = players
     self.turns = turns
+    self.ui = ui
 
   def game_ended(self):
     bankrupt_players = sum(1 for player in self.players if player.bankrupt)
@@ -39,34 +40,28 @@ class Pynopoly:
         continue
       if self.game_ended():
         break
-
       if player.in_jail():
         player.serve_time()
       else:
-        print ("%s's turn." % (player))
-        print_everything(self.players, board)
         player.roll() 
 
   def start(self):
     #For the given number of turns in a game (default 10), plays that many turns.
     for i in xrange(self.turns):
-      new_screen()
-      print "Now starting turn %d." % (i)
+      self.ui.print_message("Now starting turn %d." % (i))
       self.next_turn()
       if self.game_ended():
         break
 
-    # Game over!
-    self.print_rankings()
-
     
 
   def print_rankings(self):
+    self.ui.exit()
     print "Game Over!"
     finishing_order = sorted(self.players, key=lambda player: player.total_assets(), reverse=True)
     winner = finishing_order[0]
     print "The winner was %s with $%d in assets." % (winner, winner.total_assets())
-    section_break()
+    print ""
     print "STANDINGS:"
     headers = ["Name", "Assets", "Bankrupt"]
     boolean_to_english = lambda x: "Yes" if x else "No"
@@ -97,10 +92,21 @@ if __name__ == '__main__':
     elif opt in ("-t", "--turns"):
       num_turns = int(arg)
 
-  players = [Player(name, simulate=simulate)]
+  
   if num_cpus >= 1 and num_cpus <= 5:
+    players = []
+    ui = CursesUI(players, board, simulate=simulate)
+    players.append(Player(name, 0, ui, simulate=simulate)) # by default main player goes first
     for cpu_num in xrange(num_cpus):
       cpu_name = "player" + str(cpu_num)
-      players.append(Player(cpu_name, simulate=True))
-    newgame = Pynopoly(players, num_turns)
+      players.append(Player(cpu_name, cpu_num+1, ui, simulate=True))
+    
+    ui.print_board()
+    ui.refresh_players()
+    newgame = Pynopoly(players, num_turns, ui)
     newgame.start()
+    ui.exit()
+    # Game over!
+    newgame.print_rankings()
+
+  

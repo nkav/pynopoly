@@ -4,7 +4,7 @@ graphics.py - functions for the primitive terminal interface.
 """
 from Models.property import Property, RailroadProperty
 from termcolor import cprint, colored
-import os,sys
+import os, sys
 
 def new_screen():
   #clears screen
@@ -128,9 +128,9 @@ def print_developments(properties):
   developments = " " * 79 
   for position in properties:
     property = properties[position]
-    if type(property) is Property:
+    if type(property) is Property and property.owner:
       developments = developments[:position*2-1] + str(property.houses) + developments[(position*2):]
-    elif type(property) is RailroadProperty:
+    elif type(property) is RailroadProperty and property.owner:
       developments = developments[:position*2-1] + "O" + developments[(position*2):]
         
   print developments

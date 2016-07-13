@@ -3,7 +3,7 @@
 board.py - outlines the structure of the board 
 """
 
-from Models.property import Property, RailroadProperty
+from Models.property import Property, RailroadProperty, Utility
 from Models.community_chest import CommunityChest
 from Models.chance import Chance
 from Models.tax_space import TaxSpace
@@ -321,7 +321,7 @@ prop_data = {
   'boardwalk' : {
     'name': 'Boardwalk', 
     'group': 'blues',
-    'price':  40,
+    'price':  400,
     'rent': {
       0: 50,  
       1: 200, 
@@ -351,7 +351,7 @@ board = {
   9:  Property(prop_data['connecticut']),
   10: MessageSpace("Jail", "But you're just visiting!"),
   11: Property(prop_data['st_charles']),
-  12: Property(prop_data['electric']),
+  12: Utility(prop_data['electric']),
   13: Property(prop_data['states']),
   14: Property(prop_data['virginia']),
   15: RailroadProperty('Pennsylvania Railroad'),
@@ -367,7 +367,7 @@ board = {
   25: RailroadProperty('B&O Railroad'),
   26: Property(prop_data['atlantic']),
   27: Property(prop_data['ventnor']),
-  28: Property(prop_data['water']),
+  28: Utility(prop_data['water']),
   29: Property(prop_data['marvin']),
   30: GoToJail(),
   31: Property(prop_data['pacific']),
