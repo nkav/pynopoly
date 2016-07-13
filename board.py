@@ -3,7 +3,12 @@
 board.py - outlines the structure of the board 
 """
 
-from property import Property, RailroadProperty
+from Models.property import Property, RailroadProperty
+from Models.community_chest import CommunityChest
+from Models.chance import Chance
+from Models.tax_space import TaxSpace
+from Models.message_space import MessageSpace
+from Models.jail import GoToJail
 
 #spaces where user must draw a card
 community_chests = [2, 17, 33]
@@ -330,22 +335,33 @@ prop_data = {
 
 #dictionary binding of board indices [0,39] to Property types
 #card spaces, tax spaces, jail, etc. are handled by Player.land()
+chance_spot = Chance()
+community_chest_spot = CommunityChest()
+
 board = {
+  0:  MessageSpace("Go", "Congrats!"),
   1:  Property(prop_data['mediterranean']),
+  2:  chance_spot,
   3:  Property(prop_data['baltic']),
+  4:  TaxSpace("Income Tax", 200),
   5:  RailroadProperty('Reading Railroad'),
   6:  Property(prop_data['oriental']),
+  7:  community_chest_spot,
   8:  Property(prop_data['vermont']),
   9:  Property(prop_data['connecticut']),
+  10: MessageSpace("Jail", "But you're just visiting!"),
   11: Property(prop_data['st_charles']),
   12: Property(prop_data['electric']),
   13: Property(prop_data['states']),
   14: Property(prop_data['virginia']),
   15: RailroadProperty('Pennsylvania Railroad'),
   16: Property(prop_data['st_james']),
+  17: chance_spot,
   18: Property(prop_data['tennessee']),
   19: Property(prop_data['new_york']),
+  20: MessageSpace("Free Parking", "Woo!"),
   21: Property(prop_data['kentucky']),
+  22: community_chest_spot,
   23: Property(prop_data['indiana']),
   24: Property(prop_data['illinois']),
   25: RailroadProperty('B&O Railroad'),
@@ -353,10 +369,14 @@ board = {
   27: Property(prop_data['ventnor']),
   28: Property(prop_data['water']),
   29: Property(prop_data['marvin']),
+  30: GoToJail(),
   31: Property(prop_data['pacific']),
   32: Property(prop_data['north_carolina']),
+  33: chance_spot,
   34: Property(prop_data['pennsylvania']),
   35: RailroadProperty('Short Line'),
+  36: community_chest_spot,
   37: Property(prop_data['park']),
+  38: TaxSpace("Luxury Tax", 75),
   39: Property(prop_data['boardwalk'])
 }

@@ -2,7 +2,7 @@
 """ 
 graphics.py - functions for the primitive terminal interface.
 """
-
+from Models.property import Property, RailroadProperty
 from termcolor import cprint, colored
 import os,sys
 
@@ -124,9 +124,21 @@ def print_board():
   print u"\u2588 ", 
   cprint(u"\u2588", 'blue', end='\n')
 
+def print_developments(properties):
+  developments = " " * 79 
+  for position in properties:
+    property = properties[position]
+    if type(property) is Property:
+      developments = developments[:position*2-1] + str(property.houses) + developments[(position*2):]
+    elif type(property) is RailroadProperty:
+      developments = developments[:position*2-1] + "O" + developments[(position*2):]
+        
+  print developments
 
-def print_everything(players):
+
+def print_everything(players, properties):
   print_board()
+  print_developments(properties)
   for player in players:
     print_player(player.name, player.position)
 

@@ -3,22 +3,13 @@
 property.py - the basic class for a Property, as well as for the RailroadProperty
 """
 
+from space import Space
+
 # TODO: implement correct utility property rent, mortgaging
 
-class Property:
-  name = ""
-  price = 0 
-  owner = None 
-  rent = 0 
-  group = ''
-  text = 'white'
-  bg = None
-  houses = 0
-  
+class Property(Space):
   #number of total available properties for each group type
   available = {
-    'railroads': 4,
-    'utilities': 2,
     'purples': 2,
     'lightblues': 3,
     'magentas': 3,
@@ -40,8 +31,18 @@ class Property:
   def __repr__(self):
     return self.name
 
+  def handle_land(self, player, roll):
+    print "Landed on %s." % (self)
+    player.rent_or_buy(self)
+
   def add_house(self):
-    self.houses += 1
+    if (self.houses < 5): 
+      self.owner.pay(100, None)
+      self.houses += 1
+      print "You just bought a house on %s!" % self.name 
+    else:
+      print "You already have 5 houses on %s!" % self.name
+    
 
   def get_rent(self):
     """Charges rent depending on monopoly.
@@ -63,6 +64,7 @@ class Property:
     self.owner = None 
   
 class RailroadProperty(Property):
+
   def __init__(self, name):
     self.name = name
     self.price = 200
