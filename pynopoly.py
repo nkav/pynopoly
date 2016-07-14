@@ -5,8 +5,8 @@ pynopoly.py - creates and simulates a game of Monopoly
 import sys, getopt, curses
 
 from tabulate import tabulate
-from curses_ui import CursesUI
-from board import board
+from Views.curses_ui import CursesUI
+from Models.board import board
 from Models.player import Player
 
 __author__ = "Nilesh Kavthekar"
